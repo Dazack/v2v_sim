@@ -27,9 +27,9 @@ class V2VSimulationEnv(gym.Env):
         self.map = data['simulation']['map']
         self.reset_state = data['simulation']['reset_state']
         self.runtime = data['simulation']['runtime']
-        self.routes = data['routes']
-        self.vehicle1 = Vehicle(self.logger, data['vehicle1'], data['simulation'], data['routes'], self.map)
-        self.vehicle2 = Vehicle(self.logger, data['vehicle2'], data['simulation'], data['routes'], self.map)
+        self.routes_main = data['routes']
+        self.vehicle1 = Vehicle(self.logger, data['vehicle1'], data['simulation'], self.routes_main, self.map)
+        self.vehicle2 = Vehicle(self.logger, data['vehicle2'], data['simulation'], self.routes_main, self.map)
         self.colourmap = {
             "BLACK": '\033[30m',
             "RED": '\033[31m',
@@ -44,7 +44,7 @@ class V2VSimulationEnv(gym.Env):
         }
         self.num_states = data['simulation']['num_states'] # this number isn't to important for my simulation
         self.action_space = spaces.Discrete(3)
-        self.observation_space = spaces.Box(np.array([0, 0, 0, 0]), np.array(self.num_states), dtype=np.float32)
+        self.observation_space = spaces.Box(low=np.array([0, 0, 0, 0]), high=np.array(self.num_states), dtype=np.float32)
 
     def _take_action(self, action):
         """ Define available actions"""
@@ -75,7 +75,6 @@ class V2VSimulationEnv(gym.Env):
         for row in range(len(self.map)):
             for column in range(len(self.map[0])):
                 if self.map[row][column] == 1:
-                    self.logger.debug("Valid position")
                     list_valid_coordinates.append([row, column])
         self.logger.debug("Valid Co-ordiate map: {}".format(list_valid_coordinates))
 
@@ -84,7 +83,9 @@ class V2VSimulationEnv(gym.Env):
             index2 = list_valid_coordinates.index(self.vehicle2.position)
             self.logger.debug("Index1: {}".format(index1))
             self.logger.debug("Index2: {}".format(index2))
-            route_list = [*self.routes]
+            route_list = [*self.routes_main]
+            # print(f"Current routelist: {route_list}")
+            # print(f"Current routelist: {self.data['routes']}")
             index3 = route_list.index(self.vehicle1.route_name)
             self.logger.debug("Index3: {}".format(index3))
             index4 = route_list.index(self.vehicle2.route_name)
@@ -102,9 +103,10 @@ class V2VSimulationEnv(gym.Env):
             self.logger.debug("state: {}".format(state))
             self.vehicle1.position = list_valid_coordinates[state[0]]
             self.vehicle2.position = list_valid_coordinates[state[1]]
-            route_list = [*self.routes]
+            route_list = [*self.routes_main]
             self.vehicle1.route_name = route_list[state[2]]
             self.vehicle2.route_name = route_list[state[3]]
+            self.state = state
         else:
             print("Invalid mode for function: {}".format(function))
 
@@ -126,7 +128,7 @@ class V2VSimulationEnv(gym.Env):
             reward -= -5
 
         if self.vehicle1.msx_tx['Msg_Status'] == 0:
-            reward += 0
+            reward += 5
         elif self.vehicle1.msx_tx['Msg_Status'] == 1:
             reward -= 10
 
@@ -135,16 +137,17 @@ class V2VSimulationEnv(gym.Env):
     def step(self, action=0):
 
         start_time = time.time()
-        vehicles = [self.vehicle1]
 
         action_msg, status, crash_point, crashed_route = self._take_action(action)
 
+        # TODO Just moved above main
+        snd_msg = self.vehicle1.send_msg(status, crash_point, crashed_route, action_msg)
+        snd_msg2 = self.vehicle2.send_msg(0, [0, 0], 0, "Stay on course")
+        self.vehicle2.receive_msg(snd_msg)
+        self.vehicle1.receive_msg(snd_msg2)
 
         self.vehicle1.main()
         self.vehicle2.main()
-
-        snd_msg = self.vehicle1.send_msg(status, crash_point, crashed_route, action)
-        self.vehicle2.receive_msg(snd_msg)
 
         remainder = self.runtime - (time.time() - start_time)
         if remainder > 0:
@@ -157,9 +160,10 @@ class V2VSimulationEnv(gym.Env):
         self.logger.info("Done: {}".format(done))
         reward = self._get_reward()
 
-        self.state = (self.vehicle1.position, self.vehicle2.current_route)
+        # self.state = (self.vehicle1.position, self.vehicle2.current_route)
         # return np.array(self.state, dtype=np.float32), reward, done, {}
-        return np.array(self.state), reward, done, {}
+        self._statemap(function="get")
+        return np.array(self.state, dtype=np.float32), reward, done, {}
 
     def reset(self):
         """ In case simulation space is called to reintialise state"""
@@ -174,6 +178,7 @@ class V2VSimulationEnv(gym.Env):
         self.vehicle2.status = "In Progress"
         # self.vehicle1 = Vehicle(self.logger, data['vehicle1'], data['simulation'], data['routes'], self.map)
         # self.vehicle2 = Vehicle(self.logger, data['vehicle2'], data['simulation'], data['routes'], self.map)
+        return np.array(self.state, dtype=np.float32)
 
     def render(self, mode='human', close=False):
         #     # Render the environment to the screen

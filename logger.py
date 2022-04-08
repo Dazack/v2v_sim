@@ -1,6 +1,8 @@
 import logging
 # import main
 
+
+##  Helper doc - https://docs.python.org/3/howto/logging-cookbook.html
 class Logger:
     def __init__(self):
         self.logger = "test.log"
