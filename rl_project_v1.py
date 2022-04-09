@@ -37,10 +37,11 @@ env.render()
 # rew_tot=0
 # obs= env.reset()
 # env.render()
-# for _ in range(30):
+# done = False
+# while not done:
 #     action = env.action_space.sample() #take step using random action from possible actions (actio_space)
 #     print(action)
-#     obs, rew, done, info = env.step(action)
+#     obs, rew, done, info = env.step(0)
 #     rew_tot = rew_tot + rew
 #     env.render()
 # #Print the reward of these random action
@@ -51,7 +52,7 @@ env.render()
 ## Helpers
 # https://pythonprogramming.net/q-learning-analysis-reinforcement-learning-python-tutorial/
 # https://medium.com/swlh/using-q-learning-for-openais-cartpole-v1-4a216ef237df
-
+#
 LEARNING_RATE = 0.1
 
 DISCOUNT = 0.95
@@ -59,8 +60,6 @@ EPISODES = 60000
 total = 0
 total_reward = 0
 prior_reward = 0
-Observation = [42, 42, 2, 2]
-np_array_win_size = np.array([1, 1, 0.01, 0.01])
 DISCRETE_OS_SIZE = [2] * len(env.observation_space.high)
 discrete_os_win_size = (env.observation_space.high - env.observation_space.low)/DISCRETE_OS_SIZE
 epsilon = 1
@@ -70,7 +69,6 @@ summary = []
 num_box = tuple((env.observation_space.high + np.ones(env.observation_space.shape)).astype(int))
 q_table = np.zeros(num_box + (env.action_space.n,))
 
-# q_table = np.random.uniform(low=-20, high=20, size=(Observation + [env.action_space.n]))
 q_table.shape
 
 def get_discrete_state(state):
@@ -80,14 +78,17 @@ def get_discrete_state(state):
 
 for episode in range(EPISODES + 1): #go through the episodes
     t0 = time.time() #set the initial time
-    discrete_state = get_discrete_state(env.reset()) #get the discrete start for the restarted environment 
+    discrete_state = get_discrete_state(env.reset()) #get the discrete start for the restarted environment
     done = False
     episode_reward = 0 #reward starts as 0 for each episode
 
-    if episode % 2000 == 0: 
+    step_cnt = 0
+    step_cnt_total = 0
+
+    if episode % 2000 == 0:
         print("Episode: " + str(episode))
 
-    while not done: 
+    while not done:
 
         if np.random.random() > epsilon:
 
@@ -117,6 +118,7 @@ for episode in range(EPISODES + 1): #go through the episodes
             q_table[discrete_state + (action,)] = new_q
 
         discrete_state = new_discrete_state
+        step_cnt += 1
 
     if epsilon > 0.05: #epsilon modification
         if episode_reward > prior_reward and episode > 10000:
@@ -128,6 +130,7 @@ for episode in range(EPISODES + 1): #go through the episodes
     t1 = time.time() #episode has finished
     episode_total = t1 - t0 #episode total time
     total = total + episode_total
+    step_cnt_total += step_cnt_total + step_cnt
 
     total_reward += episode_reward #episode total reward
     prior_reward = episode_reward
@@ -137,12 +140,18 @@ for episode in range(EPISODES + 1): #go through the episodes
         mean = total / 1000
         timeavg = f"Time Average: {mean}"
         summary.append(timeavg)
-        total = 0
+
+        mean_step = step_cnt_total / 1000
+        stepavg = f"Average Number of steps: {mean_step}"
+        summary.append(stepavg)
 
         mean_reward = total_reward / 1000
         mean_rwd = f"Mean Reward: {mean_reward}"
         summary.append(mean_rwd)
+
+        total = 0
         total_reward = 0
+
         print("\n".join(summary))
 
 env.close()

@@ -10,7 +10,8 @@
     "sim_time": 20,
     "runtime": 0,
     "num_states": [42, 42, 2, 2],
-    "reset_state": [22,23,0,0]
+    "reset_state": [22,23,0,0],
+    "no_action_rwd": 255
   },
   "routes": {
     "route1": {

@@ -8,9 +8,10 @@
             [0, 0, 0, 0, 1, 1, 0, 0, 0],
             [0, 0, 0, 0, 1, 1, 0, 0, 0]],
     "sim_time": 10,
-    "runtime": 1,
+    "runtime": 0,
     "num_states": [28, 28, 3, 3],
-    "reset_state": [15,17,0,0]
+    "reset_state": [15, 17, 0, 0],
+    "no_action_rwd": 135
   },
   "routes": {
     "route1": {
@@ -49,13 +50,13 @@
     }
   },
   "vehicle1": {
-    "speed": [1, 1],
+    "speed": [2, 2],
     "vehicle_id": "veh1",
-    "start": [4, 0 ],
+    "start": [4, 0],
     "route": "route1"
   },
   "vehicle2": {
-    "speed": [1, 1],
+    "speed": [2, 2],
     "vehicle_id": "veh2",
     "start": [4, 2],
     "route": "route1"

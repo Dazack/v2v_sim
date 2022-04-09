@@ -76,20 +76,20 @@ class V2VSimulationEnv(gym.Env):
             for column in range(len(self.map[0])):
                 if self.map[row][column] == 1:
                     list_valid_coordinates.append([row, column])
-        self.logger.debug("Valid Co-ordiate map: {}".format(list_valid_coordinates))
+        #DISABLELOGGER      self.logger.debug("Valid Co-ordiate map: {}".format(list_valid_coordinates))
 
         if function == "get":
             index1 = list_valid_coordinates.index(self.vehicle1.position)
             index2 = list_valid_coordinates.index(self.vehicle2.position)
-            self.logger.debug("Index1: {}".format(index1))
-            self.logger.debug("Index2: {}".format(index2))
+            #DISABLELOGGER  self.logger.debug("Index1: {}".format(index1))
+            #DISABLELOGGERself.logger.debug("Index2: {}".format(index2))
             route_list = [*self.routes_main]
             # print(f"Current routelist: {route_list}")
             # print(f"Current routelist: {self.data['routes']}")
             index3 = route_list.index(self.vehicle1.route_name)
-            self.logger.debug("Index3: {}".format(index3))
+            #DISABLELOGGER      self.logger.debug("Index3: {}".format(index3))
             index4 = route_list.index(self.vehicle2.route_name)
-            self.logger.debug("Index4: {}".format(index4))
+            #DISABLELOGGER        self.logger.debug("Index4: {}".format(index4))
 
 
             # first 28 ints give the position of vehicle 1
@@ -97,10 +97,10 @@ class V2VSimulationEnv(gym.Env):
             # next 3 ints give route of vehicle 1
             # last 3 ints give route of vehicle 2
             self.state = np.array([index1, index2, index3, index4])
-            self.logger.debug("Current State: {}".format(self.state))
+            #DISABLELOGGER    self.logger.debug("Current State: {}".format(self.state))
 
         elif function == "set":
-            self.logger.debug("state: {}".format(state))
+            #DISABLELOGGER    self.logger.debug("state: {}".format(state))
             self.vehicle1.position = list_valid_coordinates[state[0]]
             self.vehicle2.position = list_valid_coordinates[state[1]]
             route_list = [*self.routes_main]
@@ -151,13 +151,13 @@ class V2VSimulationEnv(gym.Env):
 
         remainder = self.runtime - (time.time() - start_time)
         if remainder > 0:
-            self.logger.info("Sleeping for {}".format(remainder))
+            #DISABLELOGGER     self.logger.info("Sleeping for {}".format(remainder))
             time.sleep(remainder)
 
         self.goal_position = self.vehicle1.destination
-        self.logger.info("Goal position {}".format(self.goal_position))
+        #DISABLELOGGER  self.logger.info("Goal position {}".format(self.goal_position))
         done = bool(self.vehicle1.position == self.goal_position)# and self.data['vehicle1']['route'] != self.data['vehicle2']['route'])
-        self.logger.info("Done: {}".format(done))
+        #DISABLELOGGER  self.logger.info("Done: {}".format(done))
         reward = self._get_reward()
 
         # self.state = (self.vehicle1.position, self.vehicle2.current_route)
@@ -168,7 +168,7 @@ class V2VSimulationEnv(gym.Env):
     def reset(self):
         """ In case simulation space is called to reintialise state"""
         # self.logger.info("Reseting Vehicles and simulation map")
-        self.logger.info("Reseting Vehicles")
+        #DISABLELOGGER    self.logger.info("Reseting Vehicles")
         # self.end_sim_time = data['simulation']['sim_time']
         # self.map = data['simulation']['map']
 
@@ -183,7 +183,7 @@ class V2VSimulationEnv(gym.Env):
     def render(self, mode='human', close=False):
         #     # Render the environment to the screen
         out = self.map
-        self.logger.info("Vehicle1 point {}".format(self.vehicle1.position))
+        #DISABLELOGGER     self.logger.info("Vehicle1 point {}".format(self.vehicle1.position))
         print("Map:")
         for row in range(len(out)): #ud
             for column in range(len(out[row])): #lr
