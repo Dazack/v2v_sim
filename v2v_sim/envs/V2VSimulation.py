@@ -1,14 +1,11 @@
-# Master Script
-from pandas.io.formats import style
-
+# Master Script from v2v Simulator
 from logger import Logger
 import time
 from vehicle import Vehicle
-import json
 import gym
-from gym import error, spaces, utils
-from gym.utils import seeding
+from gym import spaces
 import numpy as np
+import operator
 
 
 class V2VSimulationEnv(gym.Env):
@@ -43,7 +40,7 @@ class V2VSimulationEnv(gym.Env):
             "RESET": '\033[0m'
         }
         self.num_states = data['simulation']['num_states'] # this number isn't to important for my simulation
-        self.action_space = spaces.Discrete(3)
+        self.action_space = spaces.Discrete(4)
         self.observation_space = spaces.Box(low=np.array([0, 0, 0, 0]), high=np.array(self.num_states), dtype=np.float32)
 
     def _take_action(self, action):
@@ -63,6 +60,11 @@ class V2VSimulationEnv(gym.Env):
             status = 1  # Not okay
             crash_point = [0, 0]
             crashed_route = "route2"
+            action_msg = "Divert"
+        elif action == 3:
+            status = 1  # Not okay
+            crash_point = [0, 0]
+            crashed_route = "route3"
             action_msg = "Divert"
 
         return action_msg, status, crash_point, crashed_route
@@ -115,15 +117,16 @@ class V2VSimulationEnv(gym.Env):
 
         reward = 0
 
+        speed = sum(list(map(operator.sub, self.vehicle1.diff_end, self.vehicle1.diff_start)))
         if self.vehicle1.diff_start > self.vehicle1.diff_end:
-            reward += 5
+            reward += 5*speed
         elif self.vehicle1.diff_start < self.vehicle1.diff_end:
-            reward -= 20
+            reward -= 20*speed
         else:
             reward -= -5
 
         if self.vehicle1.current_route != self.vehicle2.current_route:
-            reward += 20
+            reward += 10
         else:
             reward -= -5
 
