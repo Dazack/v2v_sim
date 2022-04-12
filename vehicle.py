@@ -42,7 +42,7 @@ class Vehicle:
         self.status = "In Progress"
         self.other_vehicle_position = [-1, -1]
 
-        #DISABLELOGGER  self.logger.info("Intialising new vehicle {}".format(self.vehicle_id))
+        self.logger.info("Intialising new vehicle {}".format(self.vehicle_id))
 
     def direction_sel(self, direction):
 
@@ -59,55 +59,55 @@ class Vehicle:
             self.move_right()
 
     def move_up(self):
-        #DISABLELOGGER   self.logger.info("Moving {} Up".format(self.vehicle_id))
+        self.logger.info("Moving {} Up".format(self.vehicle_id))
         self.position[0] -= self.current_speed[0]
-        #DISABLELOGGER   self.logger.info("New position {}".format(self.position))
+        self.logger.info("New position {}".format(self.position))
 
     def move_down(self):
-        #DISABLELOGGER    self.logger.info("Moving {} Down".format(self.vehicle_id))
+        self.logger.info("Moving {} Down".format(self.vehicle_id))
         self.position[0] += self.current_speed[1]
-        #DISABLELOGGER   self.logger.info("New position {}".format(self.position))
+        self.logger.info("New position {}".format(self.position))
 
     def move_right(self):
-        #DISABLELOGGER self.logger.info("Moving {} Right".format(self.vehicle_id))
+        self.logger.info("Moving {} Right".format(self.vehicle_id))
         self.position[1] += self.current_speed[2]
-        #DISABLELOGGER   self.logger.info("New position {}".format(self.position))
+        self.logger.info("New position {}".format(self.position))
 
     def move_left(self):
-        #DISABLELOGGER  self.logger.info("Moving {} Left".format(self.vehicle_id))
+        self.logger.info("Moving {} Left".format(self.vehicle_id))
         self.position[1] -= self.current_speed[3]
-        #DISABLELOGGER  self.logger.info("New position {}".format(self.position))
+        self.logger.info("New position {}".format(self.position))
 
     def find_biggest_diff(self, list, priority=""):
 
-        #DISABLELOGGER    self.logger.debug("Finding biggest difference in list for {}: {}".format(self.vehicle_id, list))
+        self.logger.debug("Finding biggest difference in list for {}: {}".format(self.vehicle_id, list))
 
         if abs(list[0]) > abs(list[1]) or priority.startswith("y") is True:
-            #DISABLELOGGER    self.logger.debug("{} Should go up/down".format(self.vehicle_id))
+            self.logger.debug("{} Should go up/down".format(self.vehicle_id))
             value = list[0]
             if value == 0:
                 p = "x no change"
-                #DISABLELOGGER          self.logger.debug("{} No change - p {} ".format(self.vehicle_id, p))
+                self.logger.debug("{} No change - p {} ".format(self.vehicle_id, p))
             elif value < 0:
                 p = "x down"
-                #DISABLELOGGER      self.logger.debug("{} Go Down - p {}".format(self.vehicle_id, p))
+                self.logger.debug("{} Go Down - p {}".format(self.vehicle_id, p))
             elif value > 0:
                 p = "x up"
-                #DISABLELOGGER       self.logger.debug("{} Go Up - p{} ".format(self.vehicle_id, p))
+                self.logger.debug("{} Go Up - p{} ".format(self.vehicle_id, p))
         elif abs(list[0]) < abs(list[1]) or priority.startswith("x") is True:
-            #DISABLELOGGER        self.logger.debug("{} Should go left/right".format(self.vehicle_id))
+            self.logger.debug("{} Should go left/right".format(self.vehicle_id))
             value = list[1]
             if value == 0:
                 p = "y no change"
-                #DISABLELOGGER       self.logger.debug("{} No change - p {}".format(self.vehicle_id, p))
+                self.logger.debug("{} No change - p {}".format(self.vehicle_id, p))
             elif value > 0:
                 p = "y right"
-                #DISABLELOGGER      self.logger.debug("{} Go Right - p {}".format(self.vehicle_id, p))
+                self.logger.debug("{} Go Right - p {}".format(self.vehicle_id, p))
             elif value < 0:
                 p = "y left"
-                #DISABLELOGGER       self.logger.debug("{} Go Left - p {}".format(self.vehicle_id, p))
+                self.logger.debug("{} Go Left - p {}".format(self.vehicle_id, p))
         else:
-            #DISABLELOGGER  self.logger.debug("{} Go any direction".format(self.vehicle_id))
+            self.logger.debug("{} Go any direction".format(self.vehicle_id))
             p = "any"
 
         return p
@@ -121,7 +121,7 @@ class Vehicle:
 
         action = 0
         options = self.get_valid_road()
-        #DISABLELOGGER     self.logger.info("{} Need to cover distance: {}".format(self.vehicle_id, self.diff_start))
+        self.logger.info("{} Need to cover distance: {}".format(self.vehicle_id, self.diff_start))
 
         # Find the greatest difference between the 2 co-ordinates for the route, prioritise the larger gap
         p1 = self.find_biggest_diff(self.diff_start)
@@ -129,11 +129,11 @@ class Vehicle:
 
         try:
             if self.current_route != []:
-                #DISABLELOGGER   self.logger.debug("Preferred Route for {} is: {} and options are: {}".format(self.vehicle_id, self.current_route[str(self.position)], options))
+                self.logger.debug("Preferred Route for {} is: {} and options are: {}".format(self.vehicle_id, self.current_route[str(self.position)], options))
                 if self.current_route[str(self.position)] in options:
                     self.direction_sel(self.current_route[str(self.position)])
                     action += 1
-                    #DISABLELOGGER         self.logger.debug("{} Following preferred_route, going {}".format(self.vehicle_id, self.current_route[str(self.position)]))
+                    self.logger.debug("{} Following preferred_route, going {}".format(self.vehicle_id, self.current_route[str(self.position)]))
                 else:
                     self.logger.debug("{} Unable to follow preferred_route. {}".format(self.vehicle_id, self.current_route[str(self.position)]))
         except Exception as gen_err:
@@ -152,14 +152,14 @@ class Vehicle:
             self.logger.debug("{} No change - Next priority").format(self.vehicle_id)
 
         elif p1 in options and action == 0:
-            #DISABLELOGGER   self.logger.info("{} Move {}".format(self.vehicle_id, p1))
+            self.logger.info("{} Move {}".format(self.vehicle_id, p1))
             self.direction_sel(p1)
             action += 1
         else:
             self.logger.debug("{} All action already used".format(self.vehicle_id))
 
         if p2 in options and action == 0:
-            #DISABLELOGGER    self.logger.info("{} Move {}".format(self.vehicle_id, p1))
+            self.logger.info("{} Move {}".format(self.vehicle_id, p1))
             self.direction_sel(p2)
             action += 1
         else:
@@ -170,8 +170,8 @@ class Vehicle:
         options = []
 
         # print("Current Postion {}".format(self.map[self.position[0]][self.position[1]]))
-        #DISABLELOGGER  self.logger.info("Len Map rows {}".format(len(self.map)))
-        #DISABLELOGGER    self.logger.info("Len Map columns {}".format(len(self.map[0])))
+        self.logger.info("Len Map rows {}".format(len(self.map)))
+        self.logger.info("Len Map columns {}".format(len(self.map[0])))
 
         # print(f"Printing Vehicle ID: {self.vehicle_id}")
         # print(f"Printing Vehicle Route: {self.current_route}")
@@ -188,7 +188,7 @@ class Vehicle:
                     self.logger.info("{} Can't move down, Another vehicle is there".format(self.vehicle_id))
                     break
                 elif self.map[self.position[0] + i][self.position[1]] == 1:
-                    #DISABLELOGGER    self.logger.info("{} Down is valid".format(self.vehicle_id))
+                    self.logger.info("{} Down is valid".format(self.vehicle_id))
                     options.append("down")
                     self.current_speed[1] = i
             except IndexError as index_err:
@@ -204,7 +204,7 @@ class Vehicle:
                     self.logger.info("{} Can't move up, Another vehicle is there".format(self.vehicle_id))
                     break
                 elif self.map[self.position[0] - i][self.position[1]] == 1:
-                    #DISABLELOGGER      self.logger.info("{} Up is valid".format(self.vehicle_id))
+                    self.logger.info("{} Up is valid".format(self.vehicle_id))
                     options.append("up")
                     self.current_speed[0] = i
             except IndexError as index_err:
@@ -220,7 +220,7 @@ class Vehicle:
                     self.logger.info("{} Can't move right, Another vehicle is there".format(self.vehicle_id))
                     break
                 elif self.map[self.position[0]][self.position[1] + i] == 1:
-                    #DISABLELOGGER        self.logger.info("{} Right is valid".format(self.vehicle_id))
+                    self.logger.info("{} Right is valid".format(self.vehicle_id))
                     options.append("right")
                     self.current_speed[2] = i
             except IndexError as index_err:
@@ -236,7 +236,7 @@ class Vehicle:
                     self.logger.info("{} Can't move left, Another vehicle is there".format(self.vehicle_id))
                     break
                 elif self.map[self.position[0]][self.position[1] - i] == 1:
-                    #DISABLELOGGER     self.logger.info("{} Left is valid".format(self.vehicle_id))
+                    self.logger.info("{} Left is valid".format(self.vehicle_id))
                     options.append("left")
                     self.current_speed[3] = i
             except IndexError as index_err:
@@ -250,7 +250,7 @@ class Vehicle:
         """
         # [0, self.vehicle_id, self.position, self.preferred_route, self.message]
 
-        #DISABLELOGGER   self.logger.info("Preparing message")
+        self.logger.info("Preparing message")
         message_data = [status, crash_point, crashed_route, action]
         self.msx_tx = {
             "Timestamp": time.time(),
@@ -271,23 +271,20 @@ class Vehicle:
         """
         # [0, self.vehicle_id, self.position, self.preferred_route, self.message]
 
-        #DISABLELOGGER  self.logger.info(" {} Received message: {}".format(self.vehicle_id, msx_rx))
+        self.logger.info(" {} Received message: {}".format(self.vehicle_id, msx_rx))
         if msx_rx["Msg_Status"] == 1:
-            #DISABLELOGGER    self.logger.info("Message and crash data")
+            self.logger.info("Message and crash data")
 
             try:
                 if self.current_route == self.__route_map[msx_rx["Broken_route"]]:
-                    #DISABLELOGGER self.logger.debug("Need to take alternative route to {}".format(msx_rx["Broken_route"]))
+                    self.logger.debug("Need to take alternative route to {}".format(msx_rx["Broken_route"]))
                     if len(self.__route_map) >= 2:
-                        # print(f"Route map before {self.__route_map}")
                         del self.__route_map[msx_rx["Broken_route"]]
-                        # print(f"Route map after {self.__route_map}")
                         good_keys = list(self.__route_map.keys())
                         self.route_name = random.choice(good_keys)
-                        #DISABLELOGGER          self.logger.info("New route selected {}".format(self.route_name))
+                        self.logger.info("New route selected {}".format(self.route_name))
                         self.current_route = self.__route_map[self.route_name]
                         self.destination = self.current_route["destination"]
-
                 else:
                     self.logger.info("Crash does not effect my immediate route")
             except Exception as no_key:
@@ -298,10 +295,8 @@ class Vehicle:
 
     def main(self):
 
-        # self.time = time
-
         if self.status == "Done":
-            #DISABLELOGGER    self.logger.info("{} is finished, removed from simulation".format(self.vehicle_id))
+            self.logger.info("{} is finished, removed from simulation".format(self.vehicle_id))
             self.position = [4, 0]
         elif self.position != self.destination:
             self.diff_start = list(map(operator.sub, self.destination, self.position))
@@ -309,5 +304,4 @@ class Vehicle:
             self.diff_end = list(map(operator.sub, self.destination, self.position))
         else:
             self.status = "Done"
-            #DISABLELOGGER   self.logger.info("{} Destination Reached".format(self.vehicle_id))
-
+            self.logger.info("{} Destination Reached".format(self.vehicle_id))

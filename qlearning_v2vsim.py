@@ -14,12 +14,15 @@ import numpy as np
 import time
 import math
 import json
+import csv
+import logging.config
 from v2v_sim.envs.V2VSimulation import V2VSimulationEnv
 
 
 
 ## Load a scenario Configuration File
-with open('./scenarios/scenario2.json') as json_file:
+scenario = "scenario2"
+with open(f'./scenarios/{scenario}.json') as json_file:
     data = json.load(json_file)
 
 ## Load the V2V simulation Enviroment
@@ -28,10 +31,17 @@ env = V2VSimulationEnv(data)
 env.reset()
 # env.render()
 
+# Turning off logging ptherwise get ~Gbs worth of logs very quickly
+
+logging.config.dictConfig({
+    'version': 1,
+    'disable_existing_loggers': True
+})
+
 ### Q Learning Setup inputs for Bellman Equaltion
 LEARNING_RATE = 0.1
 DISCOUNT = 0.95
-EPISODES = 60000
+EPISODES = 80000
 total_reward = 0
 prior_reward = 0
 step_cnt_total = 0
@@ -45,6 +55,12 @@ num_box = tuple((env.observation_space.high + np.ones(env.observation_space.shap
 q_table = np.zeros(num_box + (env.action_space.n,))
 
 q_table.shape
+
+# Prepare csv writter
+csv_file = open(f'qlearning_results/{scenario}__0_1__0_95__{EPISODES}.csv', 'w', encoding='UTF8', newline='')
+writer = csv.writer(csv_file)
+header = ["Episode", "Average Number of steps", "Mean Reward"]
+writer.writerow(header)
 
 def get_discrete_state(state):
     discrete_state = (state - env.observation_space.low)/discrete_os_win_size
@@ -95,9 +111,9 @@ for episode in range(EPISODES + 1): #Run all episodes
             if episode % 500 == 0:
                 print("Epsilon: " + str(epsilon))
 
-    step_cnt_total += step_cnt
+    step_cnt_total += step_cnt # Step total count
 
-    total_reward += episode_reward #episode total reward
+    total_reward += episode_reward # Episode total reward
     prior_reward = episode_reward
 
     if episode % 1000 == 0: # Every 1000 episodes print the average step count and the average reward
@@ -119,8 +135,11 @@ for episode in range(EPISODES + 1): #Run all episodes
 
         # Print current output of Q-Learning
         print("\n".join(summary))
+        data = [episode, mean_step, mean_reward]
+        writer.writerow(data)
 
 #Close simulation and print final output of Q-Learning
+csv_file.close()
 env.close()
 print(q_table)
 print("\n".join(summary))
