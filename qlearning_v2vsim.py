@@ -21,7 +21,7 @@ from v2v_sim.envs.V2VSimulation import V2VSimulationEnv
 
 
 ## Load a scenario Configuration File
-scenario = "scenario2"
+scenario = "scenario3"
 with open(f'./scenarios/{scenario}.json') as json_file:
     data = json.load(json_file)
 
@@ -31,7 +31,7 @@ env = V2VSimulationEnv(data)
 env.reset()
 # env.render()
 
-# Turning off logging ptherwise get ~Gbs worth of logs very quickly
+# Turning off logging otherwise get ~Gbs worth of logs very quickly
 
 logging.config.dictConfig({
     'version': 1,
@@ -41,7 +41,7 @@ logging.config.dictConfig({
 ### Q Learning Setup inputs for Bellman Equaltion
 LEARNING_RATE = 0.1
 DISCOUNT = 0.95
-EPISODES = 80000
+EPISODES = 5000
 total_reward = 0
 prior_reward = 0
 step_cnt_total = 0
@@ -50,6 +50,8 @@ discrete_os_win_size = (env.observation_space.high - env.observation_space.low)/
 epsilon = 1
 epsilon_decay_value = 0.99995
 summary = []
+current_actions = []
+highest_rew = [0, 10, 18, []]
 
 num_box = tuple((env.observation_space.high + np.ones(env.observation_space.shape)).astype(int))
 q_table = np.zeros(num_box + (env.action_space.n,))
@@ -72,6 +74,7 @@ for episode in range(EPISODES + 1): #Run all episodes
     done = False
     episode_reward = 0 # Reset the episodes reward
     step_cnt = 0 # Reset the episodes step count
+    current_actions = [] # Reset list for recording actions
 
     if episode % 2000 == 0: # Print Step Number for every 2000 Episodes
         print("Episode: " + str(episode))
@@ -85,6 +88,8 @@ for episode in range(EPISODES + 1): #Run all episodes
             action = np.random.randint(0, env.action_space.n) # Take a random action
 
         new_state, reward, done, _ = env.step(action) # Run Action in enviroment
+        current_actions.append(action)
+
 
         episode_reward += reward # Append the step reward
 
@@ -113,6 +118,12 @@ for episode in range(EPISODES + 1): #Run all episodes
 
     step_cnt_total += step_cnt # Step total count
 
+    if highest_rew[1] < episode_reward:
+        highest_rew[0] = episode
+        highest_rew[1] = episode_reward
+        highest_rew[2] = step_cnt
+        highest_rew[3] = current_actions
+        print(f"Highest reward so far is {highest_rew}")
     total_reward += episode_reward # Episode total reward
     prior_reward = episode_reward
 
@@ -143,3 +154,4 @@ csv_file.close()
 env.close()
 print(q_table)
 print("\n".join(summary))
+print(f"Highest reward at end is {highest_rew}")

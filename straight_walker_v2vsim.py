@@ -12,7 +12,7 @@ import json
 from v2v_sim.envs.V2VSimulation import V2VSimulationEnv
 
 ## Load a scenario Configuration File
-with open('./scenarios/scenario2.json') as json_file:
+with open('./scenarios/scenario3.json') as json_file:
     data = json.load(json_file)
 
 env = gym.make("V2VSimulation-v0")
