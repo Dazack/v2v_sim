@@ -34,18 +34,28 @@ env.render()
 
 ## Let's first do some random steps in the simulation so you see how the simulation looks like
 
-# rew_tot=0
-# obs= env.reset()
-# env.render()
-# done = False
-# while not done:
-#     action = env.action_space.sample() #take step using random action from possible actions (actio_space)
-#     print(action)
-#     obs, rew, done, info = env.step(0)
-#     rew_tot = rew_tot + rew
-#     env.render()
-# #Print the reward of these random action
-# print("Reward: %r" % rew_tot)
+rew_tot=0
+obs= env.reset()
+env.render()
+done = False
+step = 0
+while not done:
+    print(f"Step: {step}")
+    action = env.action_space.sample() #take step using random action from possible actions (actio_space)
+    if step == 50:
+        obs, rew, done, info = env.step(1)
+    else:
+        obs, rew, done, info = env.step(0)
+    print(obs)
+    print(rew)
+    rew_tot = rew_tot + rew
+    env.render()
+    step += 1
+#Print the reward of these random action
+env.render()
+rew_tot = rew_tot + rew
+print(f"Step: {step}")
+print("Reward: %r" % rew_tot)
 
 
 ### Q Learning
@@ -53,110 +63,111 @@ env.render()
 # https://pythonprogramming.net/q-learning-analysis-reinforcement-learning-python-tutorial/
 # https://medium.com/swlh/using-q-learning-for-openais-cartpole-v1-4a216ef237df
 #
-LEARNING_RATE = 0.1
-
-DISCOUNT = 0.95
-EPISODES = 60000
-total = 0
-total_reward = 0
-prior_reward = 0
-DISCRETE_OS_SIZE = [2] * len(env.observation_space.high)
-discrete_os_win_size = (env.observation_space.high - env.observation_space.low)/DISCRETE_OS_SIZE
-epsilon = 1
-epsilon_decay_value = 0.99995
-summary = []
-
-num_box = tuple((env.observation_space.high + np.ones(env.observation_space.shape)).astype(int))
-q_table = np.zeros(num_box + (env.action_space.n,))
-
-q_table.shape
-
-def get_discrete_state(state):
-    discrete_state = (state - env.observation_space.low)/discrete_os_win_size
-    return tuple(discrete_state.astype(int))  # we use this tuple to look up the 3 Q values for the available actions in the q-table
-
-
-for episode in range(EPISODES + 1): #go through the episodes
-    t0 = time.time() #set the initial time
-    discrete_state = get_discrete_state(env.reset()) #get the discrete start for the restarted environment
-    done = False
-    episode_reward = 0 #reward starts as 0 for each episode
-
-    step_cnt = 0
-    step_cnt_total = 0
-
-    if episode % 2000 == 0:
-        print("Episode: " + str(episode))
-
-    while not done:
-
-        if np.random.random() > epsilon:
-
-            action = np.argmax(q_table[discrete_state]) #take cordinated action
-        else:
-
-            action = np.random.randint(0, env.action_space.n) #do a random ation
-
-        new_state, reward, done, _ = env.step(action) #step action to get new states, reward, and the "done" status.
-
-        episode_reward += reward #add the reward
-
-        new_discrete_state = get_discrete_state(new_state)
-
-        if episode % 2000 == 0: #render
-            env.render()
-
-        # print(new_discrete_state)
-
-        if not done: #update q-table
-            max_future_q = np.max(q_table[new_discrete_state])
-
-            current_q = q_table[discrete_state + (action,)]
-
-            new_q = (1 - LEARNING_RATE) * current_q + LEARNING_RATE * (reward + DISCOUNT * max_future_q)
-
-            q_table[discrete_state + (action,)] = new_q
-
-        discrete_state = new_discrete_state
-        step_cnt += 1
-
-    if epsilon > 0.05: #epsilon modification
-        if episode_reward > prior_reward and episode > 10000:
-            epsilon = math.pow(epsilon_decay_value, episode - 10000)
-
-            if episode % 500 == 0:
-                print("Epsilon: " + str(epsilon))
-
-    t1 = time.time() #episode has finished
-    episode_total = t1 - t0 #episode total time
-    total = total + episode_total
-    step_cnt_total += step_cnt_total + step_cnt
-
-    total_reward += episode_reward #episode total reward
-    prior_reward = episode_reward
-
-    if episode % 1000 == 0: #every 1000 episodes print the average time and the average reward
-        summary.append(f"Episode: {episode}")
-        mean = total / 1000
-        timeavg = f"Time Average: {mean}"
-        summary.append(timeavg)
-
-        mean_step = step_cnt_total / 1000
-        stepavg = f"Average Number of steps: {mean_step}"
-        summary.append(stepavg)
-
-        mean_reward = total_reward / 1000
-        mean_rwd = f"Mean Reward: {mean_reward}"
-        summary.append(mean_rwd)
-
-        total = 0
-        total_reward = 0
-
-        print("\n".join(summary))
-
-env.close()
-print(q_table)
-print("\n".join(summary))
+# LEARNING_RATE = 0.1
+#
+# DISCOUNT = 0.95
+# EPISODES = 60000
+# total = 0
+# total_reward = 0
+# prior_reward = 0
+# step_cnt_total = 0
+# DISCRETE_OS_SIZE = [2] * len(env.observation_space.high)
+# discrete_os_win_size = (env.observation_space.high - env.observation_space.low)/DISCRETE_OS_SIZE
+# epsilon = 1
+# epsilon_decay_value = 0.99995
+# summary = []
+#
+# num_box = tuple((env.observation_space.high + np.ones(env.observation_space.shape)).astype(int))
+# q_table = np.zeros(num_box + (env.action_space.n,))
+#
+# q_table.shape
+#
+# def get_discrete_state(state):
+#     discrete_state = (state - env.observation_space.low)/discrete_os_win_size
+#     return tuple(discrete_state.astype(int))  # we use this tuple to look up the 3 Q values for the available actions in the q-table
+#
+#
+# for episode in range(EPISODES + 1): #go through the episodes
+#     t0 = time.time() #set the initial time
+#     discrete_state = get_discrete_state(env.reset()) #get the discrete start for the restarted environment
+#     done = False
+#     episode_reward = 0 #reward starts as 0 for each episode
+#
+#     step_cnt = 0
+#
+#     if episode % 2000 == 0:
+#         print("Episode: " + str(episode))
+#
+#     while not done:
+#
+#         if np.random.random() > epsilon:
+#
+#             action = np.argmax(q_table[discrete_state]) #take cordinated action
+#         else:
+#
+#             action = np.random.randint(0, env.action_space.n) #do a random ation
+#
+#         new_state, reward, done, _ = env.step(action) #step action to get new states, reward, and the "done" status.
+#
+#         episode_reward += reward #add the reward
+#
+#         new_discrete_state = get_discrete_state(new_state)
+#
+#         if episode % 2000 == 0: #render
+#             env.render()
+#
+#         # print(new_discrete_state)
+#
+#         if not done: #update q-table
+#             max_future_q = np.max(q_table[new_discrete_state])
+#
+#             current_q = q_table[discrete_state + (action,)]
+#
+#             new_q = (1 - LEARNING_RATE) * current_q + LEARNING_RATE * (reward + DISCOUNT * max_future_q)
+#
+#             q_table[discrete_state + (action,)] = new_q
+#
+#         discrete_state = new_discrete_state
+#         step_cnt += 1
+#
+#     if epsilon > 0.05: #epsilon modification
+#         if episode_reward > prior_reward and episode > 10000:
+#             epsilon = math.pow(epsilon_decay_value, episode - 10000)
+#
+#             if episode % 500 == 0:
+#                 print("Epsilon: " + str(epsilon))
+#
+#     t1 = time.time() #episode has finished
+#     episode_total = t1 - t0 #episode total time
+#     total = total + episode_total
+#     step_cnt_total += step_cnt
+#
+#     total_reward += episode_reward #episode total reward
+#     prior_reward = episode_reward
+#
+#     if episode % 1000 == 0: #every 1000 episodes print the average time and the average reward
+#         summary.append(f"Episode: {episode}")
+#         mean = total / 1000
+#         timeavg = f"Time Average: {round(mean, 5)}"
+#         summary.append(timeavg)
+#
+#         mean_step = step_cnt_total / 1000
+#         stepavg = f"Average Number of steps: {round(mean_step, 3)}"
+#         summary.append(stepavg)
+#
+#         mean_reward = total_reward / 1000
+#         mean_rwd = f"Mean Reward: {round(mean_reward, 3)}"
+#         summary.append(mean_rwd)
+#
+#         total = 0
+#         total_reward = 0
+#         step_cnt_total = 0
+#
+#         print("\n".join(summary))
+#
+# env.close()
+# print(q_table)
+# print("\n".join(summary))
 
 ### Q learning - https:#medium.com/nerd-for-tech/q-learning-from-the-basics-b68e74f97254
 

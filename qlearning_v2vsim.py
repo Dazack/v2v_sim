@@ -21,7 +21,7 @@ from v2v_sim.envs.V2VSimulation import V2VSimulationEnv
 
 
 ## Load a scenario Configuration File
-scenario = "scenario3"
+scenario = "scenario2"
 with open(f'./scenarios/{scenario}.json') as json_file:
     data = json.load(json_file)
 
@@ -41,7 +41,7 @@ logging.config.dictConfig({
 ### Q Learning Setup inputs for Bellman Equaltion
 LEARNING_RATE = 0.1
 DISCOUNT = 0.95
-EPISODES = 5000
+EPISODES = 50000
 total_reward = 0
 prior_reward = 0
 step_cnt_total = 0
@@ -96,7 +96,7 @@ for episode in range(EPISODES + 1): #Run all episodes
         new_discrete_state = get_discrete_state(new_state) #Update new state
 
         if episode % 2000 == 0: # Render every 2000 Episodes
-            env.render()
+            env.render(save=True)
 
         if not done: # Update Q-Table based on new value
             max_future_q = np.max(q_table[new_discrete_state])

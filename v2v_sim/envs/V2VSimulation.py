@@ -1,4 +1,5 @@
 # Master Script from v2v Simulator
+import os
 from logger import Logger
 import time
 from vehicle import Vehicle
@@ -6,6 +7,11 @@ import gym
 from gym import spaces
 import numpy as np
 import operator
+from matplotlib import pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.animation import PillowWriter
+import numpy as np
+import networkx as nx
 
 
 class V2VSimulationEnv(gym.Env):
@@ -178,33 +184,56 @@ class V2VSimulationEnv(gym.Env):
         # self.vehicle2 = Vehicle(self.logger, data['vehicle2'], data['simulation'], data['routes'], self.map)
         return np.array(self.state, dtype=np.float32)
 
-    def render(self, mode='human', close=False):
+
+
+    def render(self, mode='human', save=False):
         #     # Render the environment to the screen
         out = self.map
         self.logger.info("Vehicle1 point {}".format(self.vehicle1.position))
-        print("Map:")
-        for row in range(len(out)): #ud
-            for column in range(len(out[row])): #lr
-                # print([row, column])
-                if [row, column] == self.vehicle1.position:
-                    if self.vehicle1.status == "Done":
-                        print("{}{}{}".format(self.colourmap["GREEN"], out[row][column], self.colourmap["RESET"]),
-                              end=" ")
-                    else:
-                        print("{}{}{}".format(self.colourmap["RED"], out[row][column], self.colourmap["RESET"]),
-                              end=" ")
-                elif [row, column] == self.vehicle2.position:
-                    if self.vehicle2.status == "Done":
-                        print("{}{}{}".format(self.colourmap["YELLOW"], out[row][column], self.colourmap["RESET"]),
-                              end=" ")
-                    else:
-                        print("{}{}{}".format(self.colourmap["BLUE"], out[row][column], self.colourmap["RESET"]),
-                              end=" ")
+
+        a = np.array(out)
+        colormap = []
+
+        # define grid graph according to the shape of a
+        G = nx.grid_2d_graph(*a.shape)
+
+        # remove those nodes where the corresponding value is != 0
+        for val, node in zip(a.ravel(), sorted(G.nodes())):
+            if val != 1:
+                G.remove_node(node)
+
+        plt.figure(figsize=(9, 9))
+        # coordinate rotation
+        pos = {(x, y): (y, -x) for x, y in G.nodes()}
+
+        for x, y in G.nodes():
+            if (x == self.vehicle1.position[0]) and (y == self.vehicle1.position[1]):
+                if bool(self.vehicle1.position == self.vehicle1.destination):
+                    colormap.append('green')
                 else:
-                    print(out[row][column], end=" ")
-            print("")
+                    colormap.append('red')
+            elif (x == self.vehicle2.position[0]) and (y == self.vehicle2.position[1]):
+                if self.vehicle2.status == "Done":
+                    colormap.append('yellow')
+                else:
+                    colormap.append('blue')
+            else:
+                colormap.append('grey')
 
+        nx.draw(G, pos=pos,
+                node_color=colormap,
+                width=4,
+                node_size=400)
 
+        if save == True:
+            plt.pause(0.1)
+            i = 0
+            while os.path.exists("./images/foo%s.png" % i):
+                i += 1
+            plt.savefig(f'./images/foo{i}.png')
+
+        plt.clf()
+        plt.close()
 
 # Press the green button in the gutter to run the script.
 # if __name__ == '__main__':
