@@ -39,7 +39,7 @@ logging.config.dictConfig({
 })
 
 ### Q Learning Setup inputs for Bellman Equaltion
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.25
 DISCOUNT = 0.95
 EPISODES = 50000
 total_reward = 0
